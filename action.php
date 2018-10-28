@@ -1,7 +1,7 @@
 <?php
 
 if (isset($_GET['action'])) {
-    $action  = $_GET['action'];
+    $action = $_GET['action'];
     $command = $_GET['command'];
 
     $heatController = new HeatController();
@@ -16,6 +16,9 @@ if (isset($_GET['action'])) {
                 break;
             case 'turbo':
                 $heatController->turnOnTurbo();
+                break;
+            case 'auto':
+                $return = $heatController->autoMode(19, 23);
                 break;
         }
 
@@ -32,6 +35,7 @@ if (isset($_GET['action'])) {
             default:
                 $return = $heatController->getAll();
         }
+
     }
 
     header('Content-type: application/json');
@@ -63,7 +67,7 @@ class HeatController
 
     protected function resetToDefault()
     {
-        $on    = self::ON_PIN;
+        $on = self::ON_PIN;
         $turbo = self::TURBO_PIN;
 
         io('write', $on, '1');
@@ -82,7 +86,7 @@ class HeatController
 
     public function turnOnTurbo()
     {
-        $on    = self::ON_PIN;
+        $on = self::ON_PIN;
         $turbo = self::TURBO_PIN;
 
         io('mode', $on, 'out');
@@ -98,7 +102,7 @@ class HeatController
 
     public function isOn()
     {
-        $on    = self::ON_PIN;
+        $on = self::ON_PIN;
         $turbo = self::TURBO_PIN;
 
         return (io('read', $on) === 0 && io('read', $turbo) === 1);
@@ -106,7 +110,7 @@ class HeatController
 
     public function isTurbo()
     {
-        $on    = self::ON_PIN;
+        $on = self::ON_PIN;
         $turbo = self::TURBO_PIN;
 
         return (io('read', $on) === 0 && io('read', $turbo) === 0);
@@ -114,7 +118,7 @@ class HeatController
 
     public function isOff()
     {
-        $on    = self::ON_PIN;
+        $on = self::ON_PIN;
         $turbo = self::TURBO_PIN;
 
 
@@ -138,9 +142,9 @@ class HeatController
         `modprobe w1-gpio`;
         `modprobe w1-therm`;
 
-        $baseDir      = '/sys/bus/w1/devices/';
+        $baseDir = '/sys/bus/w1/devices/';
         $deviceFolder = glob($baseDir . '28*')[0];
-        $deviceFile   = $deviceFolder . '/w1_slave';
+        $deviceFile = $deviceFolder . '/w1_slave';
 
         $data = file($deviceFile, FILE_IGNORE_NEW_LINES);
 
@@ -158,5 +162,30 @@ class HeatController
     public function getAll()
     {
         return ['mode' => $this->getHeatingMode(), 'temp' => $this->getTemperature()];
+    }
+
+    public function autoMode($minTemp, $maxTemp)
+    {
+        $currentTemp = $this->getTemperature();
+
+        if ($currentTemp > $maxTemp) {
+            if ($this->isOn()) {
+                $this->turnOff();
+            }
+        } else if ($currentTemp < $minTemp) {
+            if (($maxTemp - $currentTemp) > 2) {
+                if (!$this->isTurbo()) {
+                    $this->turnOnTurbo();
+                }
+            } else {
+                if (!$this->isOn()) {
+                    $this->turnOn();
+                }
+            }
+
+        }
+
+        return '';
+
     }
 }
