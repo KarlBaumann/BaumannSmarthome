@@ -62,11 +62,11 @@
 
 <!-- Page Content -->
 <div class="container">
-    <div class="row">
-        <div class="col-lg-12 text-center">
+    <div id="app">
+        <div class="row">
+            <div class="col-lg-6 col-md-6 text-center">
 
-            <br><br><br>
-            <div id="app">
+                <br><br><br>
                 <div class="row">
                     <div class="col-lg-6 col-md-6 col-xs-6"><h1 class="temperature">{{temp}} &#8451;</h1></div>
                     <div class="col-lg-6 col-md-6 col-xs-6"><h1 class="mode">{{mode}}</h1></div>
@@ -87,6 +87,25 @@
                 </label>
             </div>
 
+
+            <div class="col-lg-6 col-md-6 text-center">
+
+
+                <br><br><br>
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-xs-6"><h1 class="minTemp">Min</h1></div>
+                    <div class="col-lg-6 col-md-6 col-xs-6"><h1 class="maxTemp">Max</h1></div>
+                </div>
+                <br><br><br><br>
+                <form class="form-inline  text-center">
+                    <div class="form-group">
+                        <input type="range" class="custom-range" id="minTemp">
+                    </div>
+                    <div class="form-group">
+                        <input type="range" class="custom-range" id="maxTemp">
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

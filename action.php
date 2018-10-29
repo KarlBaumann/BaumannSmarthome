@@ -3,6 +3,8 @@
 if (isset($_GET['action'])) {
     $action = $_GET['action'];
     $command = $_GET['command'];
+    $minTemp = $_GET['min'] ?? 14;
+    $maxTemp = $_GET['max'] ?? 26;
 
     $heatController = new HeatController();
 
@@ -18,7 +20,7 @@ if (isset($_GET['action'])) {
                 $heatController->turnOnTurbo();
                 break;
             case 'auto':
-                $return = $heatController->autoMode(19, 23);
+                $return = $heatController->autoMode($minTemp, $maxTemp);
                 break;
         }
 
@@ -164,8 +166,9 @@ class HeatController
         return ['mode' => $this->getHeatingMode(), 'temp' => $this->getTemperature()];
     }
 
-    public function autoMode($minTemp, $maxTemp)
+    public function autoMode($minTemp, $maxTemp, $turboThreshold = 2)
     {
+
         $currentTemp = $this->getTemperature();
 
         if ($currentTemp > $maxTemp) {
@@ -173,7 +176,7 @@ class HeatController
                 $this->turnOff();
             }
         } else if ($currentTemp < $minTemp) {
-            if (($maxTemp - $currentTemp) > 2) {
+            if (($maxTemp - $currentTemp) > $turboThreshold) {
                 if (!$this->isTurbo()) {
                     $this->turnOnTurbo();
                 }
