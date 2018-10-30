@@ -170,25 +170,43 @@ class HeatController
     {
 
         $currentTemp = $this->getTemperature();
+	$status = '';
 
         if ($currentTemp > $maxTemp) {
+	    $status = 'Current temp > max temp. ';
             if ($this->isOn()) {
+		$status .= 'Heating was on. Switched off. ';
                 $this->turnOff();
-            }
+            } else if($this->isTurbo()) {
+		$status .= 'Heating was Turbo. Switched off. ';
+                $this->turnOff();
+	    }
+	    
         } else if ($currentTemp < $minTemp) {
+	    $status = 'Current temp < min temp. ';
             if (($maxTemp - $currentTemp) > $turboThreshold) {
+		$status .= 'Difference larger than treshold, going turbo. ';
                 if (!$this->isTurbo()) {
+		    $status .= 'Turbo was not on - turned on. ';
                     $this->turnOnTurbo();
-                }
+                } else {
+		    $status .= 'Turbo was already enabled. ';
+		}
             } else {
+		$status .= 'Difference was lower than treshold. Turning normal mode on. ';
                 if (!$this->isOn()) {
+		    $status .= 'Normal mode was not ON, so turned ON. ';
                     $this->turnOn();
-                }
+                } else {
+		    $status .= 'Normal mode was already enabled. ';
+		}
             }
 
-        }
+        } else {
+	    $status .= "Temerature in range. Min: $minTemp Max: $maxTemp Current: $currentTemp";
+	}
 
-        return '';
+        return ['msg'=>$status];
 
     }
 }
